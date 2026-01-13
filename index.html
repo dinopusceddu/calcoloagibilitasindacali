@@ -53,8 +53,7 @@
         );
 
         const App = () => {
-            // Esempio su ente di 80 dipendenti
-            const [dipendenti, setDipendenti] = useState(80);
+            const [dipendenti, setDipendenti] = useState("80");
             const [enteNome, setEnteNome] = useState("");
             const [unions, setUnions] = useState([
                 { id: '1', name: 'FP CGIL', voti: 30, deleghe: 25, adminH: "", adminM: "", forceRep: null },
@@ -68,6 +67,11 @@
             const MIN_RSU_PRO_CAPITE = 30;
             const BIG_4 = ['FP CGIL', 'CISL FP', 'UIL FPL', 'CSA REGIONI AUTONOMIE LOCALI'];
 
+            const dipendentiNum = useMemo(() => {
+                const val = parseInt(dipendenti);
+                return isNaN(val) ? 0 : val;
+            }, [dipendenti]);
+
             const formatTime = (totalMinutes) => {
                 const total = Math.round(totalMinutes);
                 const h = Math.floor(total / 60);
@@ -78,7 +82,7 @@
             const results = useMemo(() => {
                 const totalVoti = unions.reduce((acc, u) => acc + (Number(u.voti) || 0), 0);
                 const totalDeleghe = unions.reduce((acc, u) => acc + (Number(u.deleghe) || 0), 0);
-                const monteLordoTotaleMinuti = dipendenti * MIN_OOSS_PRO_CAPITE;
+                const monteLordoTotaleMinuti = dipendentiNum * MIN_OOSS_PRO_CAPITE;
 
                 const base = unions.map(u => {
                     const pV = totalVoti > 0 ? (Number(u.voti) / totalVoti) * 100 : 0;
@@ -92,7 +96,7 @@
 
                 return base.map(u => {
                     let nettoU = 0;
-                    const percRiduzione = dipendenti > 50 ? 38 : 57;
+                    const percRiduzione = dipendentiNum > 50 ? 38 : 57;
 
                     if (sumAllPesi > 0) {
                         const pesoRiproprozionato = (u.pesoLocale / sumAllPesi) * 100;
@@ -116,10 +120,10 @@
 
                     return { ...u, nettoU, match, currentReduction: percRiduzione };
                 });
-            }, [unions, dipendenti]);
+            }, [unions, dipendentiNum]);
 
-            const monteRSU = dipendenti * MIN_RSU_PRO_CAPITE;
-            const monteOOSS = dipendenti * MIN_OOSS_PRO_CAPITE;
+            const monteRSU = dipendentiNum * MIN_RSU_PRO_CAPITE;
+            const monteOOSS = dipendentiNum * MIN_OOSS_PRO_CAPITE;
 
             return (
                 <div className="p-4 md:p-8 max-w-[1400px] mx-auto min-h-screen text-slate-900">
@@ -167,7 +171,7 @@
                                             </span>
                                         </td>
                                         <td style={{textAlign: 'center'}}>{u.adminH || 0}h {u.adminM || 0}m</td>
-                                        <td style={{textAlign: 'center'}}>V: {u.voti} - D: {u.deleghe}</td>
+                                        <td style={{textAlign: 'center'}}>V: {u.voti || 0} - D: {u.deleghe || 0}</td>
                                         <td style={{textAlign: 'right'}} className="font-black text-red-700">{formatTime(u.nettoU)}</td>
                                         <td style={{textAlign: 'center', fontWeight: 'bold'}}>
                                             {u.match === 'match' ? "CONFORME" : u.match === 'mismatch' ? "DIFFERENZA" : "-"}
@@ -193,7 +197,14 @@
                             <div className="bg-white p-5 rounded-3xl shadow-lg border-2 border-red-50 flex flex-col items-center">
                                 <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 italic text-center">Dipendenti (Teste)</label>
                                 <div className="flex items-center gap-2">
-                                    <input type="number" value={dipendenti} onChange={(e) => setDipendenti(Math.max(1, parseInt(e.target.value) || 0))} className="text-3xl font-black outline-none w-24 text-slate-800 bg-transparent text-center" />
+                                    <input 
+                                        type="number" 
+                                        value={dipendenti} 
+                                        onChange={(e) => setDipendenti(e.target.value)} 
+                                        onBlur={(e) => { if (e.target.value === "" || parseInt(e.target.value) < 1) setDipendenti("1"); }}
+                                        className="text-3xl font-black outline-none w-24 text-slate-800 bg-transparent text-center" 
+                                        placeholder="1"
+                                    />
                                 </div>
                             </div>
                         </header>
@@ -224,7 +235,7 @@
                         <section className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden mb-8">
                             <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-white">
                                 <h2 className="text-2xl font-black text-slate-900 tracking-tight">Prospetto di Confronto Sigle</h2>
-                                <button onClick={() => setUnions([...unions, { id: Date.now().toString(), name: '', voti: 0, deleghe: 0, adminH: "", adminM: "", forceRep: null }])} className="flex items-center gap-2 px-6 py-3 bg-red-700 text-white rounded-2xl hover:bg-red-800 transition-all font-bold shadow-lg shadow-red-100"><ShieldIcon className="w-4 h-4" /> Aggiungi Sigla</button>
+                                <button onClick={() => setUnions([...unions, { id: Date.now().toString(), name: '', voti: "", deleghe: "", adminH: "", adminM: "", forceRep: null }])} className="flex items-center gap-2 px-6 py-3 bg-red-700 text-white rounded-2xl hover:bg-red-800 transition-all font-bold shadow-lg shadow-red-100"><ShieldIcon className="w-4 h-4" /> Aggiungi Sigla</button>
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse">
@@ -249,7 +260,12 @@
                                                                 {u.isRep ? `Detrazione Cumulo: ${u.currentReduction}%` : 'Altra Sigla (Quota Intera)'}
                                                             </span>
                                                         </div>
-                                                        <button onClick={() => setUnions(unions.filter(un => un.id !== u.id))} className="opacity-0 group-hover:opacity-100 p-2 hover:text-red-600 transition-opacity">
+                                                        {/* Pulsante eliminazione reso sempre visibile e colorato */}
+                                                        <button 
+                                                            onClick={() => setUnions(unions.filter(un => un.id !== u.id))} 
+                                                            className="p-2 text-slate-400 hover:text-red-600 transition-colors"
+                                                            title="Elimina sigla"
+                                                        >
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                                                         </button>
                                                     </div>
@@ -269,8 +285,14 @@
                                                 </td>
                                                 <td className="py-6 px-4">
                                                     <div className="flex flex-col gap-2 items-center justify-center">
-                                                        <div className="flex items-gap-2"><label className="text-xs font-black text-slate-400 min-w-[35px] text-right">VOTI</label><input type="number" value={u.voti} onChange={(e) => setUnions(unions.map(un => un.id === u.id ? { ...un, voti: e.target.value } : un))} className="w-16 text-center text-sm border border-slate-200 rounded-xl bg-white p-2 font-black text-slate-700" /></div>
-                                                        <div className="flex items-gap-2"><label className="text-xs font-black text-slate-400 min-w-[35px] text-right">DEL.</label><input type="number" value={u.deleghe} onChange={(e) => setUnions(unions.map(un => un.id === u.id ? { ...un, deleghe: e.target.value } : un))} className="w-16 text-center text-sm border border-slate-200 rounded-xl bg-white p-2 font-black text-slate-700" /></div>
+                                                        <div className="flex items-center gap-2">
+                                                            <label className="text-xs font-black text-slate-400 min-w-[35px] text-right">VOTI</label>
+                                                            <input type="number" value={u.voti} onChange={(e) => setUnions(unions.map(un => un.id === u.id ? { ...un, voti: e.target.value } : un))} className="w-16 text-center text-sm border border-slate-200 rounded-xl bg-white p-2 font-black text-slate-700" />
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <label className="text-xs font-black text-slate-400 min-w-[35px] text-right">DEL.</label>
+                                                            <input type="number" value={u.deleghe} onChange={(e) => setUnions(unions.map(un => un.id === u.id ? { ...un, deleghe: e.target.value } : un))} className="w-16 text-center text-sm border border-slate-200 rounded-xl bg-white p-2 font-black text-slate-700" />
+                                                        </div>
                                                     </div>
                                                 </td>
                                                 <td className="py-6 px-4 text-right">
