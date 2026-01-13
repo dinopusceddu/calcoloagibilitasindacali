@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calcolatore Permessi Sindacali - FP CGIL</title>
+    <title>Calcolatore Permessi Sindacali - FP CGIL Lombardia</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- React e Babel -->
@@ -118,10 +118,10 @@
             return (
                 <div className="p-4 md:p-8 max-w-[1400px] mx-auto min-h-screen">
                     
-                    {/* --- VERSIONE SEMPLIFICATA PER LA STAMPA (VISIBILE SOLO SU CARTA/PDF) --- */}
+                    {/* --- VERSIONE SEMPLIFICATA PER LA STAMPA --- */}
                     <div className="print-view">
                         <div className="text-center mb-6">
-                            <h1 className="text-2xl font-black uppercase text-red-700">Ripartizione Prerogative Sindacali</h1>
+                            <h1 className="text-2xl font-black uppercase text-red-700">Calcolatore Permessi Sindacali - FP CGIL Lombardia</h1>
                             <p className="text-sm font-bold text-slate-500">Computo Certificato - Guida ARAN Maggio 2025</p>
                         </div>
 
@@ -146,14 +146,14 @@
                                     <th>Sigla Sindacale</th>
                                     <th style={{textAlign: 'center'}}>Calcolo Amm.ne</th>
                                     <th style={{textAlign: 'center'}}>Voti / Del.</th>
-                                    <th style={{textAlign: 'right'}}>Netto Software</th>
+                                    <th style={{textAlign: 'right'}}>Calcolo corretto</th>
                                     <th style={{textAlign: 'center'}}>Esito</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {results.map(u => (
                                     <tr key={u.id}>
-                                        <td className="font-bold">{u.name} {u.isRep && "(REP.)"}</td>
+                                        <td className="font-bold">{u.name}</td>
                                         <td style={{textAlign: 'center'}}>{u.adminH || 0}h {u.adminM || 0}m</td>
                                         <td style={{textAlign: 'center'}}>V: {u.voti} - D: {u.deleghe}</td>
                                         <td style={{textAlign: 'right'}} className="font-black text-red-700">{formatTime(u.nettoU)}</td>
@@ -164,11 +164,6 @@
                                 ))}
                             </tbody>
                         </table>
-                        
-                        <div style={{marginTop: '60px', display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #ccc', paddingTop: '20px'}}>
-                            <div style={{textAlign: 'center', width: '45%'}}><p className="font-bold">L'Amministrazione</p></div>
-                            <div style={{textAlign: 'center', width: '45%'}}><p className="font-bold">Le OO.SS.</p></div>
-                        </div>
                     </div>
 
                     {/* --- INTERFACCIA WEB (NASCOSTA IN STAMPA) --- */}
@@ -223,7 +218,7 @@
                                             <th className="py-5 px-8 text-xs font-bold text-slate-400 uppercase tracking-widest">Sigla Sindacale</th>
                                             <th className="py-5 px-4 text-xs font-bold text-red-600 uppercase text-center">Calcolo Amm.ne</th>
                                             <th className="py-5 px-4 text-xs font-bold text-slate-400 uppercase text-center">Voti/Del.</th>
-                                            <th className="py-5 px-4 text-xs font-bold text-slate-900 uppercase text-right">Netto Software</th>
+                                            <th className="py-5 px-4 text-xs font-bold text-slate-900 uppercase text-right">Calcolo corretto</th>
                                             <th className="py-5 px-8 text-xs font-bold text-slate-400 uppercase text-center">Esito</th>
                                         </tr>
                                     </thead>
